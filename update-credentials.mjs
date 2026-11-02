@@ -1,0 +1,18 @@
+import {pathToFileURL} from 'node:url';
+import fs from 'node:fs/promises';
+const toolPath='C:/Users/Vicky Mishra/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/@oai/artifact-tool/dist/artifact_tool.mjs';
+const {FileBlob,SpreadsheetFile}=await import(pathToFileURL(toolPath).href);
+const path='C:/Users/Vicky Mishra/Downloads/testing 3/outputs/01a16509-b973-7573-a806-bbfe3bd773be/Website_Issues.xlsx';
+const wb=await SpreadsheetFile.importXlsx(await FileBlob.load(path));
+const ws=wb.worksheets.getItem('Issues');
+ws.getRange('H11').values=[['Deferred by owner']];
+ws.getRange('I11').values=[['Owner asked to keep current credentials and related profile details unchanged for now and revisit later. The UCL/DClinPsy, BACP/HCPC and training-history claims have not been verified.']];
+ws.getRange('I11').format={font:{color:'#24312D',size:10},wrapText:true,verticalAlignment:'top',fill:'#F0F4EE'};
+ws.getRange('I11').format.rowHeight=68;
+await wb.recalculate();
+const preview=await wb.render({sheetName:'Issues',range:'G10:I11',scale:1,format:'png'});
+await fs.writeFile('C:/Users/Vicky Mishra/Downloads/testing 3/outputs/01a16509-b973-7573-a806-bbfe3bd773be/Website_Issues_note_preview.png',new Uint8Array(await preview.arrayBuffer()));
+const result=await wb.inspect({kind:'region',sheetId:'Issues',range:'G9:I11',maxChars:1800});
+console.log(result.ndjson ?? JSON.stringify(result));
+const file=await SpreadsheetFile.exportXlsx(wb); await file.save(path);
+console.log(`SAVED ${path}`);

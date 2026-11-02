@@ -1,0 +1,18 @@
+import {pathToFileURL} from 'node:url';
+import fs from 'node:fs/promises';
+const toolPath='C:/Users/Vicky Mishra/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/@oai/artifact-tool/dist/artifact_tool.mjs';
+const {FileBlob,SpreadsheetFile}=await import(pathToFileURL(toolPath).href);
+const path='C:/Users/Vicky Mishra/Downloads/testing 3/outputs/01a16509-b973-7573-a806-bbfe3bd773be/Website_Issues.xlsx';
+const wb=await SpreadsheetFile.importXlsx(await FileBlob.load(path));
+const ws=wb.worksheets.getItem('Issues');
+ws.getRange('H12').values=[['Updated per owner']];
+ws.getRange('I12').values=[['Owner provided the replacement figures: 4 years of care and 65 people supported. Updated both Home page statistics and the repeated years-of-practice badge in src/pages/Home.jsx.']];
+ws.getRange('I12').format={font:{color:'#24312D',size:10},wrapText:true,verticalAlignment:'top',fill:'#F0F4EE'};
+ws.getRange('I12').format.rowHeight=68;
+await wb.recalculate();
+const preview=await wb.render({sheetName:'Issues',range:'G11:I12',scale:1,format:'png'});
+await fs.writeFile('C:/Users/Vicky Mishra/Downloads/testing 3/outputs/01a16509-b973-7573-a806-bbfe3bd773be/Website_Issues_note_preview.png',new Uint8Array(await preview.arrayBuffer()));
+const result=await wb.inspect({kind:'region',sheetId:'Issues',range:'G11:I12',maxChars:1300});
+console.log(result.ndjson ?? JSON.stringify(result));
+const file=await SpreadsheetFile.exportXlsx(wb); await file.save(path);
+console.log(`SAVED ${path}`);
